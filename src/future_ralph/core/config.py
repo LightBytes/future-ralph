@@ -1,7 +1,7 @@
 import yaml
 from pathlib import Path
-from typing import Any, Dict, Optional
-from pydantic import BaseModel
+from typing import Optional
+from pydantic import BaseModel, ConfigDict
 
 class RalphConfig(BaseModel):
     max_iters: int = 5
@@ -9,6 +9,8 @@ class RalphConfig(BaseModel):
     test_cmd: str = "pytest"
     stop_on_success: bool = True
     active_tools: list[str] = []
+
+    model_config = ConfigDict(extra='ignore')
 
 class ConfigManager:
     def __init__(self, config_path: Optional[Path] = None):
