@@ -17,8 +17,11 @@ else:
 
 from future_ralph.core.plugin import Plugin
 
+_plugins: list[Plugin] = []
+
 def load_plugins(app: typer.Typer):
     """Load plugins from entry points."""
+    global _plugins
     try:
         discovered_plugins = entry_points(group="future_ralph.plugins")
         for entry_point in discovered_plugins:
@@ -28,13 +31,24 @@ def load_plugins(app: typer.Typer):
                 plugin = plugin_cls()
                 if isinstance(plugin, Plugin):
                     plugin.register(app)
+                    _plugins.append(plugin)
                 elif hasattr(plugin, "register"):
                      plugin.register(app)
+                     # If it doesn't strictly follow protocol but has register, we still add it
+                     _plugins.append(plugin) # type: ignore
             except Exception as e:
                 typer.echo(f"Failed to load plugin {entry_point.name}: {e}")
     except Exception:
          # Graceful fallback if something goes wrong with entry_points
          pass
+
+def trigger_post_run(run_id: str, prompt: str, status: str, best_future_id: Optional[str] = None):
+    for plugin in _plugins:
+        if hasattr(plugin, "post_run"):
+            try:
+                plugin.post_run(run_id, prompt, status, best_future_id)
+            except Exception as e:
+                typer.echo(f"Plugin error in post_run: {e}")
 
 app = typer.Typer(help="Future-Ralph: A Heterogeneous Agent Wrapper")
 
@@ -104,10 +118,17 @@ def _execute_run_logic(run_obj, prompt: str, max_iters: int):
     
     best_future = engine.execute_run(prompt, adapters)
     
-    if best_future and best_future.result.exit_code == 0:
+    status = "failed"
+    best_id = None
+    if best_future and best_future.result and best_future.result.exit_code == 0:
         typer.echo(f"Success! Best future: {best_future.id} (Score: {best_future.score})")
+        status = "success"
+        best_id = best_future.id
     else:
         typer.echo("Failed to find a successful future.")
+
+    trigger_post_run(run_obj.id, prompt, status, best_id)
+
 
 
 @app.command()
