@@ -4,14 +4,21 @@ from future_ralph.main import app
 
 runner = CliRunner()
 
-@patch("future_ralph.main.IterationEngine")
-@patch("future_ralph.main.RunManager")
+@patch("future_ralph.main.CodexAdapter")
+@patch("future_ralph.main.ClaudeAdapter")
+@patch("future_ralph.main.OpenCodeAdapter")
 @patch("future_ralph.main.GeminiAdapter")
-def test_run_command(mock_gemini, mock_manager, mock_engine):
+@patch("future_ralph.main.RunManager")
+@patch("future_ralph.main.IterationEngine")
+def test_run_command(mock_engine, mock_manager, mock_gemini, mock_opencode, mock_claude, mock_codex):
     # Setup mocks
-    mock_gemini_instance = mock_gemini.return_value
-    mock_gemini_instance.detect.return_value = {"found": True}
+    mock_gemini.return_value.detect.return_value = {"found": True}
+    mock_gemini.return_value.capabilities.return_value.name = "gemini"
     
+    mock_opencode.return_value.detect.return_value = {"found": False}
+    mock_claude.return_value.detect.return_value = {"found": False}
+    mock_codex.return_value.detect.return_value = {"found": False}
+
     mock_manager_instance = mock_manager.return_value
     mock_run = MagicMock()
     mock_run.id = "test-run-id"
@@ -27,7 +34,7 @@ def test_run_command(mock_gemini, mock_manager, mock_engine):
     result = runner.invoke(app, ["run", "Fix bug"])
     
     assert result.exit_code == 0
-    assert "Exploring futures for: Fix bug" in result.stdout
+    assert "Found agent: gemini" in result.stdout
     assert "Success! Best future: future_2010" in result.stdout
 
 def test_status_command():

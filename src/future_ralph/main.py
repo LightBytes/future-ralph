@@ -5,6 +5,9 @@ from future_ralph.core.run_manager import RunManager
 from future_ralph.core.engine import IterationEngine
 from future_ralph.core.models import RunConfig
 from future_ralph.adapters.gemini import GeminiAdapter
+from future_ralph.adapters.opencode import OpenCodeAdapter
+from future_ralph.adapters.claude import ClaudeAdapter
+from future_ralph.adapters.codex import CodexAdapter
 from pathlib import Path
 
 app = typer.Typer(help="Future-Ralph: A Heterogeneous Agent Wrapper")
@@ -28,18 +31,30 @@ def run(
         typer.echo("Running in detached mode... (Not fully implemented)")
         return
 
-    # In v1, we use GeminiAdapter if found
-    gemini = GeminiAdapter()
-    if not gemini.detect()["found"]:
-        typer.echo("Error: No supported agents found. Please run 'future-ralph setup'.")
-        # For demo purposes if gemini isn't installed, we might want to mock or warn
+    # Initialize all known adapters
+    possible_adapters = [
+        GeminiAdapter(),
+        OpenCodeAdapter(),
+        ClaudeAdapter(),
+        CodexAdapter(),
+    ]
+    
+    # Filter for available adapters
+    adapters = []
+    for adapter in possible_adapters:
+        detection = adapter.detect()
+        if detection["found"]:
+            adapters.append(adapter)
+            typer.echo(f"Found agent: {adapter.capabilities().name}")
+    
+    if not adapters:
+        typer.echo("Error: No supported agents found. Please run 'future-ralph setup' or install an agent CLI.")
+        # For demo purposes if no agents are installed, we warn but don't crash
         # raise typer.Exit(1)
+        return
     
     config = RunConfig(max_iters=max_iters)
     engine = IterationEngine(run_obj, config)
-    
-    # We only have Gemini for now
-    adapters = [gemini]
     
     best_future = engine.execute_run(prompt, adapters)
     
