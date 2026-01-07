@@ -1,4 +1,5 @@
 import typer
+import subprocess
 
 from future_ralph.core.run_manager import RunManager
 from future_ralph.core.engine import IterationEngine
@@ -56,9 +57,28 @@ def run(
     typer.echo(f"Run ID: {run_obj.id}")
     
     if detach:
-        typer.echo("Running in detached mode... (Not fully implemented)")
+        typer.echo("Starting detached run...")
+        # Spawn background process
+        cmd = [sys.executable, "-m", "future_ralph.main", "internal-run", run_obj.id, prompt, str(max_iters)]
+        subprocess.Popen(cmd, start_new_session=True)
+        typer.echo(f"Run detached. Use 'future-ralph status' to check progress.")
         return
 
+    _execute_run_logic(run_obj, prompt, max_iters)
+
+@app.command(hidden=True)
+def internal_run(run_id: str, prompt: str, max_iters: int):
+    """
+    Internal command for detached execution.
+    """
+    manager = RunManager()
+    run_obj = manager.get_run(run_id)
+    if not run_obj:
+        return 
+    
+    _execute_run_logic(run_obj, prompt, max_iters)
+
+def _execute_run_logic(run_obj, prompt: str, max_iters: int):
     # Initialize all known adapters
     possible_adapters = [
         GeminiAdapter(),
@@ -77,8 +97,6 @@ def run(
     
     if not adapters:
         typer.echo("Error: No supported agents found. Please run 'future-ralph setup' or install an agent CLI.")
-        # For demo purposes if no agents are installed, we warn but don't crash
-        # raise typer.Exit(1)
         return
     
     config = RunConfig(max_iters=max_iters)
