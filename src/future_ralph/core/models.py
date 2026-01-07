@@ -3,12 +3,14 @@ from typing import Any, Dict, Optional
 from enum import Enum
 from future_ralph.adapters.base import AttemptResult
 
+
 class FutureStatus(Enum):
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
     FAILED = "failed"
     SKIPPED = "skipped"
+
 
 @dataclass
 class Future:
@@ -20,6 +22,7 @@ class Future:
     score: float = 0.0
     is_treehouse: bool = False
     metadata: Dict[str, Any] = field(default_factory=dict)
+
 
 @dataclass
 class RunConfig:

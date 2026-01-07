@@ -1,12 +1,22 @@
 from textual.app import App, ComposeResult
 from textual.containers import Container, Vertical, Horizontal
-from textual.widgets import Header, Footer, Static, Button, Label, Input, Checkbox, DataTable
+from textual.widgets import (
+    Header,
+    Footer,
+    Static,
+    Button,
+    Label,
+    Input,
+    Checkbox,
+    DataTable,
+)
 from textual.screen import Screen
 from future_ralph.core.config import ConfigManager, RalphConfig
 from future_ralph.adapters.gemini import GeminiAdapter
 from future_ralph.adapters.opencode import OpenCodeAdapter
 from future_ralph.adapters.claude import ClaudeAdapter
 from future_ralph.adapters.codex import CodexAdapter
+
 
 class ToolDetection(Static):
     def on_mount(self) -> None:
@@ -22,16 +32,16 @@ class ToolDetection(Static):
         table = self.query_one(DataTable)
         table.clear()
         table.add_columns("Tool", "Status", "Path")
-        
+
         self.found_tools = []
-        
+
         for adapter in self.adapters:
             info = adapter.detect()
             status = "✅ Found" if info["found"] else "❌ Not Found"
             path = info.get("binary_path") or "N/A"
             if info["found"]:
                 self.found_tools.append(adapter.capabilities().name)
-            
+
             table.add_row(adapter.capabilities().name, status, path)
 
     def compose(self) -> ComposeResult:
@@ -42,6 +52,7 @@ class ToolDetection(Static):
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "rescan":
             self.detect_tools()
+
 
 class ConfigForm(Static):
     def compose(self) -> ComposeResult:
@@ -54,6 +65,7 @@ class ConfigForm(Static):
         yield Input(placeholder="300", id="timeout", value="300")
         yield Checkbox("Stop on Success", value=True, id="stop_success")
 
+
 class SetupScreen(Screen):
     def compose(self) -> ComposeResult:
         yield Header()
@@ -64,8 +76,8 @@ class SetupScreen(Screen):
                 Horizontal(
                     Button("Save & Exit", variant="success", id="save"),
                     Button("Cancel", variant="error", id="cancel"),
-                    classes="buttons"
-                )
+                    classes="buttons",
+                ),
             )
         )
         yield Footer()
@@ -78,23 +90,24 @@ class SetupScreen(Screen):
 
     def save_config(self) -> None:
         detection = self.query_one(ToolDetection)
-        
+
         test_cmd = self.query_one("#test_cmd", Input).value
         max_iters = int(self.query_one("#max_iters", Input).value or 5)
         timeout = int(self.query_one("#timeout", Input).value or 300)
         stop_success = self.query_one("#stop_success", Checkbox).value
-        
+
         config = RalphConfig(
             max_iters=max_iters,
             timeout_per_iter=timeout,
             test_cmd=test_cmd,
             stop_on_success=stop_success,
-            active_tools=detection.found_tools
+            active_tools=detection.found_tools,
         )
-        
+
         manager = ConfigManager()
         manager.save(config)
         self.app.exit(result="Saved")
+
 
 class SetupApp(App):
     CSS = """
@@ -120,9 +133,10 @@ class SetupApp(App):
         margin-right: 2;
     }
     """
-    
+
     def on_mount(self) -> None:
         self.push_screen(SetupScreen())
+
 
 def run_setup():
     app = SetupApp()

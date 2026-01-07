@@ -3,6 +3,7 @@ import time
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+
 class RunLogger:
     def __init__(self, run_dir: Path):
         self.run_dir = run_dir
@@ -14,11 +15,7 @@ class RunLogger:
         pass
 
     def log(self, event: str, data: Optional[Dict[str, Any]] = None):
-        entry = {
-            "timestamp": time.time(),
-            "event": event,
-            "data": data or {}
-        }
+        entry = {"timestamp": time.time(), "event": event, "data": data or {}}
         with open(self.log_file, "a") as f:
             f.write(json.dumps(entry) + "\n")
 

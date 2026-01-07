@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
+
 @dataclass
 class AttemptResult:
     stdout: str
@@ -10,14 +11,16 @@ class AttemptResult:
     duration_seconds: float
     diff: Optional[str] = None
     cost_info: Dict[str, Any] = field(default_factory=dict)
-    
+
+
 @dataclass
 class ToolCapabilities:
     name: str
     supports_model_selection: bool = False
     supports_non_interactive: bool = True
-    cost_confidence: str = "opaque" # exact, estimated, opaque
+    cost_confidence: str = "opaque"  # exact, estimated, opaque
     supported_env_keys: List[str] = field(default_factory=list)
+
 
 class BaseAdapter(ABC):
     @abstractmethod
@@ -36,7 +39,13 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def run(self, prompt: str, cwd: str, model: Optional[str] = None, timeout: Optional[int] = None) -> AttemptResult:
+    def run(
+        self,
+        prompt: str,
+        cwd: str,
+        model: Optional[str] = None,
+        timeout: Optional[int] = None,
+    ) -> AttemptResult:
         """
         Run the agent on the task.
         """
