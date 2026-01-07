@@ -10,7 +10,37 @@ from future_ralph.adapters.claude import ClaudeAdapter
 from future_ralph.adapters.codex import CodexAdapter
 from pathlib import Path
 
+import sys
+if sys.version_info < (3, 10):
+    from importlib_metadata import entry_points
+else:
+    from importlib.metadata import entry_points
+
+from future_ralph.core.plugin import Plugin
+
+def load_plugins(app: typer.Typer):
+    """Load plugins from entry points."""
+    try:
+        discovered_plugins = entry_points(group="future_ralph.plugins")
+        for entry_point in discovered_plugins:
+            try:
+                plugin_cls = entry_point.load()
+                # Instantiate and register
+                plugin = plugin_cls()
+                if isinstance(plugin, Plugin):
+                    plugin.register(app)
+                elif hasattr(plugin, "register"):
+                     plugin.register(app)
+            except Exception as e:
+                typer.echo(f"Failed to load plugin {entry_point.name}: {e}")
+    except Exception as e:
+         # Graceful fallback if something goes wrong with entry_points
+         pass
+
 app = typer.Typer(help="Future-Ralph: A Heterogeneous Agent Wrapper")
+
+# Load plugins immediately
+load_plugins(app)
 
 @app.command()
 def run(
