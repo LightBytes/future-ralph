@@ -1,8 +1,7 @@
 import json
-import logging
 import time
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 class RunLogger:
     def __init__(self, run_dir: Path):
@@ -14,7 +13,7 @@ class RunLogger:
         # We use a custom logger that writes JSONL
         pass
 
-    def log(self, event: str, data: Dict[str, Any] = None):
+    def log(self, event: str, data: Optional[Dict[str, Any]] = None):
         entry = {
             "timestamp": time.time(),
             "event": event,

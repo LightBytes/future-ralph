@@ -2,7 +2,7 @@ from future_ralph.adapters.gemini import GeminiAdapter
 from future_ralph.adapters.opencode import OpenCodeAdapter
 from future_ralph.adapters.claude import ClaudeAdapter
 from future_ralph.adapters.codex import CodexAdapter
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 def test_gemini_detection():
     adapter = GeminiAdapter()

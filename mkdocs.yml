@@ -1,0 +1,18 @@
+site_name: Future-Ralph
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.indexes
+    - content.code.copy
+  palette:
+    scheme: slate
+    primary: indigo
+    accent: cyan
+
+plugins:
+  - search
+
+nav:
+  - Home: index.md
+  - Contributing: contributing.md

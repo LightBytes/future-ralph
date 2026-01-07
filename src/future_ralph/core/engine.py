@@ -1,6 +1,5 @@
 import subprocess
-import time
-from typing import List, Optional
+from typing import List
 from future_ralph.core.models import Future, FutureStatus, RunConfig
 from future_ralph.core.run_manager import Run
 from future_ralph.core.scoring import DefaultScoringPolicy
@@ -30,14 +29,14 @@ class IterationEngine:
         # 2. Run Tests (in the directory where the agent made changes)
         # Note: In v1, we assume the agent modified files in the current repo or a copy.
         # For simplicity in this skeleton, we run the test command in the current CWD.
-        test_start = time.time()
+        # test_start = time.time()
         test_proc = subprocess.run(
             self.config.test_cmd, 
             shell=True, 
             capture_output=True, 
             text=True
         )
-        test_duration = time.time() - test_start
+        # test_duration = time.time() - test_start
         
         # Overwrite attempt exit code with test exit code if tests ran
         # This is a v1 simplification: success is defined by tests passing.
@@ -62,7 +61,7 @@ class IterationEngine:
             
             future = self.run_iteration(i, adapter, prompt)
             
-            if future.result.exit_code == 0 and self.config.stop_on_success:
+            if future.result and future.result.exit_code == 0 and self.config.stop_on_success:
                 self.run.logger.log("run_success_stop", {"future_id": future.id})
                 break
         

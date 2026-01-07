@@ -1,5 +1,4 @@
 import typer
-from typing_extensions import Annotated
 
 from future_ralph.core.run_manager import RunManager
 from future_ralph.core.engine import IterationEngine
@@ -8,7 +7,6 @@ from future_ralph.adapters.gemini import GeminiAdapter
 from future_ralph.adapters.opencode import OpenCodeAdapter
 from future_ralph.adapters.claude import ClaudeAdapter
 from future_ralph.adapters.codex import CodexAdapter
-from pathlib import Path
 
 import sys
 if sys.version_info < (3, 10):
@@ -33,7 +31,7 @@ def load_plugins(app: typer.Typer):
                      plugin.register(app)
             except Exception as e:
                 typer.echo(f"Failed to load plugin {entry_point.name}: {e}")
-    except Exception as e:
+    except Exception:
          # Graceful fallback if something goes wrong with entry_points
          pass
 
