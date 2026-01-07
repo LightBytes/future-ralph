@@ -1,0 +1,30 @@
+name: Update Homebrew Formula
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  update-homebrew:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout source
+      uses: actions/checkout@v4
+
+    - name: Get Release Version
+      id: get_version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+    - name: Calculate SHA256
+      id: shasum
+      run: |
+        curl -L -o future-ralph.tar.gz https://github.com/LightBytes/future-ralph/archive/refs/tags/${{ steps.get_version.outputs.VERSION }}.tar.gz
+        echo "SHA=$(sha256sum future-ralph.tar.gz | awk '{print $1}')" >> $GITHUB_OUTPUT
+
+    - name: Repository Dispatch
+      uses: peter-evans/repository-dispatch@v2
+      with:
+        token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        repository: LightBytes/homebrew-tap
+        event-type: update-formula
+        client-payload: '{"name": "future-ralph", "version": "${{ steps.get_version.outputs.VERSION }}", "sha": "${{ steps.shasum.outputs.SHA }}", "url": "https://github.com/LightBytes/future-ralph/archive/refs/tags/${{ steps.get_version.outputs.VERSION }}.tar.gz"}'
