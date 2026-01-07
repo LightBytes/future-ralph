@@ -61,7 +61,7 @@ def run(
         # Spawn background process
         cmd = [sys.executable, "-m", "future_ralph.main", "internal-run", run_obj.id, prompt, str(max_iters)]
         subprocess.Popen(cmd, start_new_session=True)
-        typer.echo(f"Run detached. Use 'future-ralph status' to check progress.")
+        typer.echo("Run detached. Use 'future-ralph status' to check progress.")
         return
 
     _execute_run_logic(run_obj, prompt, max_iters)
