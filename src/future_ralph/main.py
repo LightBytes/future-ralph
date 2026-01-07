@@ -38,5 +38,17 @@ def apply(future_id: str):
     """
     typer.echo(f"Applying future: {future_id}")
 
+@app.command()
+def setup():
+    """
+    Launch the TUI setup assistant.
+    """
+    try:
+        from future_ralph.tui.app import run_setup
+        run_setup()
+    except ImportError as e:
+        typer.echo(f"Error importing TUI: {e}")
+        typer.echo("Ensure 'textual' is installed.")
+
 if __name__ == "__main__":
     app()
