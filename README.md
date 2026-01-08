@@ -1,5 +1,7 @@
 # Future-Ralph
 
+![Future Ralph Banner](assets/future-ralph-banner.png)
+
 **A Heterogeneous Agent Wrapper exploring multiple possible futures.**
 
 Future-Ralph is a developer tool that explores multiple possible futures of a codebase using heterogeneous AI agents. Inspired by the non-canonical future timelines of Ralph Wiggum in The Simpsons, the tool treats each agent run as a distinct possible future.
